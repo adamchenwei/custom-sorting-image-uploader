@@ -9,7 +9,8 @@ import {
   Alert,
 } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
-import { WatchedFolderList, LogViewer, ConfigModal, FolderPicker } from './src/components';
+import * as Notifications from 'expo-notifications';
+import { WatchedFolderList, LogViewer, ConfigModal, FolderPicker, PermissionsScreen } from './src/components';
 import { WatchedFolder, LogEntry, AppConfig } from './src/types';
 import {
   getWatchedFolders,
@@ -36,22 +37,39 @@ export default function App() {
   const [showLogViewer, setShowLogViewer] = useState(false);
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [showFolderPicker, setShowFolderPicker] = useState(false);
+  const [permissionsGranted, setPermissionsGranted] = useState<boolean | null>(null);
 
-  // Load initial data
+  // Check permissions on mount
   useEffect(() => {
-    loadData();
-    requestPermissions();
+    checkInitialPermissions();
   }, []);
+
+  // Load initial data when permissions are granted
+  useEffect(() => {
+    if (permissionsGranted) {
+      loadData();
+    }
+  }, [permissionsGranted]);
 
   // Refresh logs periodically
   useEffect(() => {
+    if (!permissionsGranted) return;
+    
     const interval = setInterval(async () => {
       const currentLogs = await getLogs();
       setLogs(currentLogs);
     }, 5000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [permissionsGranted]);
+
+  const checkInitialPermissions = async () => {
+    const mediaStatus = await MediaLibrary.getPermissionsAsync();
+    const notificationStatus = await Notifications.getPermissionsAsync();
+    
+    const allGranted = mediaStatus.granted && notificationStatus.granted;
+    setPermissionsGranted(allGranted);
+  };
 
   const loadData = async () => {
     const [folders, currentLogs, currentConfig] = await Promise.all([
@@ -64,23 +82,8 @@ export default function App() {
     setConfig(currentConfig);
   };
 
-  const requestPermissions = async () => {
-    const mediaPermission = await requestMediaLibraryPermissions();
-    const notificationPermission = await requestNotificationPermissions();
-
-    if (!mediaPermission) {
-      Alert.alert(
-        'Permission Required',
-        'This app needs access to your media library to watch folders for new images.'
-      );
-    }
-
-    if (!notificationPermission) {
-      Alert.alert(
-        'Notifications Disabled',
-        'Enable notifications to receive upload status updates.'
-      );
-    }
+  const handlePermissionsGranted = () => {
+    setPermissionsGranted(true);
   };
 
   const handleAddFolder = async (album: MediaLibrary.Album) => {
@@ -155,6 +158,27 @@ export default function App() {
       setIsWatching(true);
     }
   };
+
+  // Show loading or permissions screen
+  if (permissionsGranted === null) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <StatusBar style="dark" />
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Loading...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (!permissionsGranted) {
+    return (
+      <>
+        <StatusBar style="dark" />
+        <PermissionsScreen onAllPermissionsGranted={handlePermissionsGranted} />
+      </>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -369,5 +393,14 @@ const styles = StyleSheet.create({
     color: '#1a1a1a',
     fontSize: 16,
     fontWeight: '500',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 18,
+    color: '#666',
   },
 });

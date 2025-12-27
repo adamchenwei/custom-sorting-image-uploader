@@ -49,7 +49,8 @@
         {
           "photosPermission": "This app needs access to your photo library to watch folders and upload images.",
           "savePhotosPermission": "This app needs permission to save photos.",
-          "isAccessMediaLocationEnabled": true
+          "isAccessMediaLocationEnabled": true,
+          "audioPermission": false
         }
       ],
       [
