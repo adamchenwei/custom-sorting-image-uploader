@@ -91,16 +91,13 @@ export const FolderPicker: React.FC<FolderPickerProps> = ({
   };
 
   const navigateToAlbum = (album: MediaLibrary.Album) => {
-    const childAlbums = getChildAlbums(album);
+    // Always navigate into the folder first, let user choose with "Choose This Folder" button
+    setNavigationStack([...navigationStack, { album, title: album.title }]);
+    setCurrentAlbum(album);
     
-    if (childAlbums.length > 0) {
-      setNavigationStack([...navigationStack, { album, title: album.title }]);
-      setCurrentAlbum(album);
-      setAlbums(childAlbums.filter((a) => !existingFolderUris.includes(a.id)));
-    } else {
-      onSelectFolder(album);
-      onClose();
-    }
+    // Check for child albums (based on path naming convention)
+    const childAlbums = getChildAlbums(album);
+    setAlbums(childAlbums.filter((a) => !existingFolderUris.includes(a.id)));
   };
 
   const navigateBack = () => {
@@ -134,8 +131,6 @@ export const FolderPicker: React.FC<FolderPickerProps> = ({
   };
 
   const renderItem = ({ item }: { item: MediaLibrary.Album }) => {
-    const hasChildFolders = hasChildren(item);
-    
     return (
       <View style={styles.albumItemContainer}>
         <TouchableOpacity
@@ -149,16 +144,9 @@ export const FolderPicker: React.FC<FolderPickerProps> = ({
             <Text style={styles.albumName}>{item.title.split('/').pop()}</Text>
             <Text style={styles.albumCount}>
               {item.assetCount} {item.assetCount === 1 ? 'item' : 'items'}
-              {hasChildFolders && ' • Has subfolders'}
             </Text>
           </View>
-          {hasChildFolders ? (
-            <Text style={styles.chevron}>›</Text>
-          ) : (
-            <View style={styles.selectBadge}>
-              <Text style={styles.selectBadgeText}>Select</Text>
-            </View>
-          )}
+          <Text style={styles.chevron}>›</Text>
         </TouchableOpacity>
       </View>
     );
