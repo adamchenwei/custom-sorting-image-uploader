@@ -1,0 +1,1 @@
+can you make a icon for the app with just letters "CU" and use it as the app icons? 
