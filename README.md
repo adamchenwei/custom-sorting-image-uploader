@@ -121,6 +121,65 @@ This app is designed to work with the `custom-sorting-image-viewer` server. The 
 └── package.json
 ```
 
+## Development & Debugging
+
+### WiFi Debugging (Recommended for Physical Devices)
+
+USB debugging can be unreliable on macOS. Use WiFi debugging instead:
+
+#### 1. Enable Wireless Debugging on Your Phone
+
+1. Go to **Settings → Developer options → Wireless debugging** → Turn ON
+2. Tap **Pair device with pairing code**
+3. Note the **IP:Port** and **6-digit pairing code**
+
+#### 2. Pair Your Device
+
+```bash
+# Pair with your device (use the PAIRING port, not the main port)
+~/Library/Android/sdk/platform-tools/adb pair <IP>:<PAIRING_PORT>
+# Enter the 6-digit pairing code when prompted
+```
+
+#### 3. Connect to Your Device
+
+After pairing, check the **Wireless debugging** screen for the main connection port (different from pairing port):
+
+```bash
+# Connect using the MAIN port shown on your phone
+~/Library/Android/sdk/platform-tools/adb connect <IP>:<MAIN_PORT>
+
+# Verify connection
+adb devices
+```
+
+#### 4. Run the App
+
+```bash
+npx expo run:android
+```
+
+**Tip:** Unplug USB cable before WiFi debugging to avoid conflicts.
+
+### Running on Emulator
+
+```bash
+# Just run - it will auto-detect the emulator
+npx expo run:android
+```
+
+### Important: Do NOT Use Expo Go
+
+This app uses native modules (`expo-notifications`, `expo-media-library`) that are **not supported in Expo Go** as of SDK 53+. Always use a development build:
+
+```bash
+# Correct - creates development build
+npx expo run:android
+
+# Wrong - opens in Expo Go (won't work)
+npx expo start
+```
+
 ## Troubleshooting
 
 ### Uploads Failing
