@@ -5,9 +5,9 @@ import {
   Text,
   View,
   TouchableOpacity,
-  SafeAreaView,
   Alert,
 } from 'react-native';
+import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import * as MediaLibrary from 'expo-media-library';
 import * as Notifications from 'expo-notifications';
 import { WatchedFolderList, LogViewer, ConfigModal, FolderPicker, PermissionsScreen } from './src/components';
@@ -162,27 +162,30 @@ export default function App() {
   // Show loading or permissions screen
   if (permissionsGranted === null) {
     return (
-      <SafeAreaView style={styles.container}>
-        <StatusBar style="dark" />
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading...</Text>
-        </View>
-      </SafeAreaView>
+      <SafeAreaProvider>
+        <SafeAreaView style={styles.container}>
+          <StatusBar style="dark" />
+          <View style={styles.loadingContainer}>
+            <Text style={styles.loadingText}>Loading...</Text>
+          </View>
+        </SafeAreaView>
+      </SafeAreaProvider>
     );
   }
 
   if (!permissionsGranted) {
     return (
-      <>
+      <SafeAreaProvider>
         <StatusBar style="dark" />
         <PermissionsScreen onAllPermissionsGranted={handlePermissionsGranted} />
-      </>
+      </SafeAreaProvider>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="dark" />
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.container}>
+        <StatusBar style="dark" />
       
       {/* Header */}
       <View style={styles.header}>
@@ -267,7 +270,8 @@ export default function App() {
         onSelectFolder={handleAddFolder}
         existingFolderUris={watchedFolders.map(f => f.uri)}
       />
-    </SafeAreaView>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 

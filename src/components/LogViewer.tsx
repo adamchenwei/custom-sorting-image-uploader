@@ -6,8 +6,8 @@ import {
   StyleSheet,
   Modal,
   TouchableOpacity,
-  SafeAreaView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { LogEntry } from '../types';
 
 interface LogViewerProps {

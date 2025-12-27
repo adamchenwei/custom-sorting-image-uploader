@@ -6,10 +6,10 @@ import {
   StyleSheet,
   Modal,
   TouchableOpacity,
-  SafeAreaView,
   ScrollView,
   Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppConfig } from '../types';
 
 interface ConfigModalProps {
